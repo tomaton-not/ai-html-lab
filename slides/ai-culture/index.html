@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI文化設計プロジェクト企画書 | AI Culture Ecosystem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+        .loop-line {
+            position: relative;
+        }
+        .loop-line::after {
+            content: '↓';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #6366f1;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .loop-line::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 leading-relaxed">
+
+    <!-- Hero Section -->
+    <header class="relative py-20 bg-white border-b overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+        </div>
+        <div class="container mx-auto px-6 relative z-10 text-center">
+            <span class="inline-block px-4 py-1 mb-6 text-sm font-semibold tracking-wider text-indigo-600 uppercase bg-indigo-50 rounded-full">Project Proposal</span>
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
+                AI文化設計 <span class="gradient-text">エコシステム</span>
+            </h1>
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+                AIを単なる「ツール」ではなく、組織の「設計思想」として浸透させるための戦略的循環モデル。
+            </p>
+        </div>
+    </header>
+
+    <!-- Concept Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-indigo-900 text-white rounded-3xl p-8 md:p-12 shadow-xl">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-6 flex items-center">
+                        <span class="mr-3">🧩</span> 全体コンセプト
+                    </h2>
+                    <p class="text-lg opacity-90 mb-8 leading-relaxed">
+                        これまでの「AIレシピ（Tips）」を起点に、思想・実践・理論の4要素を循環構造として設計します。
+                        単発のスキル習得で終わらせず、自律的にレベルアップし続ける「AI文化エコシステム」の構築を目指します。
+                    </p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div class="p-4 bg-white/10 rounded-xl">
+                            <div class="text-2xl mb-1">技</div>
+                            <div class="text-sm font-bold">レシピ</div>
+                        </div>
+                        <div class="p-4 bg-white/10 rounded-xl">
+                            <div class="text-2xl mb-1">思想</div>
+                            <div class="text-sm font-bold">インタビュー</div>
+                        </div>
+                        <div class="p-4 bg-white/10 rounded-xl">
+                            <div class="text-2xl mb-1">実践</div>
+                            <div class="text-sm font-bold">相談窓口</div>
+                        </div>
+                        <div class="p-4 bg-white/10 rounded-xl">
+                            <div class="text-2xl mb-1">理論</div>
+                            <div class="text-sm font-bold">仕事術</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cycle Section -->
+    <section class="py-16 bg-slate-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-16 underline decoration-indigo-500 decoration-4 underline-offset-8">🏗 循環構造（モデル図）</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Step 1 -->
+                <div class="relative p-6 bg-white rounded-2xl shadow-sm border loop-line card-hover">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-xl mb-4">1</div>
+                    <h3 class="font-bold text-lg mb-2">AIレシピ</h3>
+                    <p class="text-sm text-slate-600">「気づき」の提供。日常にAIを溶け込ませ、興味の入口を作る。</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="relative p-6 bg-white rounded-2xl shadow-sm border loop-line card-hover">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-xl mb-4">2</div>
+                    <h3 class="font-bold text-lg mb-2">相談フォーム</h3>
+                    <p class="text-sm text-slate-600">「実務の詰まり」を解消。現場のリアルな課題を吸い上げる。</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="relative p-6 bg-white rounded-2xl shadow-sm border loop-line card-hover">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-xl mb-4">3</div>
+                    <h3 class="font-bold text-lg mb-2">仕事術講座</h3>
+                    <p class="text-sm text-slate-600">「設計を学ぶ」。アカデミー講座を通じて理論と再現性を獲得。</p>
+                </div>
+                <!-- Step 4 -->
+                <div class="relative p-6 bg-white rounded-2xl shadow-sm border card-hover">
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold text-xl mb-4">4</div>
+                    <h3 class="font-bold text-lg mb-2">リーダー対談</h3>
+                    <p class="text-sm text-slate-600">「思想を吸収」。ロールモデルの頭の中を共有資産へ。</p>
+                </div>
+            </div>
+            <div class="mt-12 text-center">
+                <p class="text-indigo-600 font-bold">→ そして「さらなるレベルアップ（①）」へ戻る</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detail Sections -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <h2 class="text-3xl font-bold mb-12">施策の詳細詳細</h2>
+            
+            <div class="space-y-12">
+                <!-- Section 1 -->
+                <div class="flex flex-col md:flex-row gap-8 items-start pb-12 border-b">
+                    <div class="md:w-1/3">
+                        <h3 class="text-2xl font-bold text-indigo-700 mb-2">1. AI推進リーダーインタビュー</h3>
+                        <p class="text-slate-500">思考様式の可視化</p>
+                    </div>
+                    <div class="md:w-2/3">
+                        <div class="bg-slate-50 p-6 rounded-xl border-l-4 border-indigo-500 mb-4">
+                            <p class="font-bold mb-2">「思想」を引き出すためのGoogleドキュメント活用</p>
+                            <p class="text-sm text-slate-600">フォームではなくドキュメントを使うことで、思考の流れを止めず、深い対話（共編集）を実現します。</p>
+                        </div>
+                        <ul class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm font-medium">
+                            <li class="bg-white p-3 border rounded shadow-sm">出会いと変化</li>
+                            <li class="bg-white p-3 border rounded shadow-sm">実践とプロンプト設計</li>
+                            <li class="bg-white p-3 border rounded shadow-sm">AI時代の人間像</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Section 2 -->
+                <div class="flex flex-col md:flex-row gap-8 items-start pb-12 border-b">
+                    <div class="md:w-1/3">
+                        <h3 class="text-2xl font-bold text-indigo-700 mb-2">2. AI相談フォーム</h3>
+                        <p class="text-slate-500">Outcome Focusの実践</p>
+                    </div>
+                    <div class="md:w-2/3">
+                        <p class="mb-4">単なるQ&A窓口ではなく、<strong>「依頼設計の練習場」</strong>として定義します。</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-indigo-50 rounded-lg">
+                                <span class="block font-bold text-indigo-900">目的重視</span>
+                                <span class="text-sm">何のために？</span>
+                            </div>
+                            <div class="p-4 bg-indigo-50 rounded-lg">
+                                <span class="block font-bold text-indigo-900">成果重視</span>
+                                <span class="text-sm">どう使うか？</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3 -->
+                <div class="flex flex-col md:flex-row gap-8 items-start">
+                    <div class="md:w-1/3">
+                        <h3 class="text-2xl font-bold text-indigo-700 mb-2">3. アカデミー（仕事術）との接続</h3>
+                        <p class="text-slate-500">本質的な土台作り</p>
+                    </div>
+                    <div class="md:w-2/3">
+                        <p class="mb-4">AI活用は「要件定義力」「論点整理力」が土台。AI講座ではなく、<strong>「仕事術の実践フィールド」</strong>としてAIを活用します。</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-sm font-bold">要件定義力</span>
+                            <span class="px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-sm font-bold">論点整理力</span>
+                            <span class="px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-sm font-bold">設計思考</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Strategy Footer -->
+    <footer class="py-20 bg-slate-900 text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-8 italic">"AI活用促進ではなく、AI文化設計。"</h2>
+            <p class="max-w-2xl mx-auto opacity-70 mb-12">
+                これは単なる効率化のプロジェクトではありません。私たちの「働き方」と「考え方」をアップデートし、AIを当たり前のパートナーとする組織文化を構築するための挑戦です。
+            </p>
+            <div class="inline-block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-full font-bold transition-all cursor-pointer">
+                プロジェクト詳細・承認へ
+            </div>
+            <div class="mt-16 pt-8 border-t border-white/10 text-sm opacity-50">
+                &copy; 2024 AI Culture Ecosystem Project | Proposed by Minami
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
