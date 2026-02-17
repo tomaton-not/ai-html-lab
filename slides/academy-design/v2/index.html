@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnyMaMa Academy Sub-Plan Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin: 0 auto; height: 300px; max-height: 400px; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .gradient-text { background-clip: text; -webkit-background-clip: text; color: transparent; background-image: linear-gradient(to right, #4f46e5, #7c3aed); }
+        .nav-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; font-weight: 700; }
+        .flow-node { position: relative; padding: 1rem; border-radius: 0.75rem; background: white; border: 2px solid #e5e7eb; }
+        .flow-arrow { color: #94a3b8; font-size: 1.5rem; }
+        .status-badge { font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 9999px; font-weight: bold; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 4px; }
+    </style>
+    <!-- Chosen Palette: Project Clarity (Indigo/Emerald for success, Amber for warnings, Slate for infrastructure) -->
+    <!-- Application Structure Plan: 
+         1. Overview: 980円モデルの前提と最優先課題（システム連動）を提示。
+         2. System Analysis: Lekcha vs 他LMS比較と、理想的な権限連動フローの可視化。
+         3. Content & Insights: 量産体制の明記と「中の人」施策の運用フロー。
+         4. P&L Simulation: 会員数に応じた損益分岐点のシミュレーション。
+         WHY: 関係者間で「システムの自動化が生命線であること」を共通認識にするために設計。 -->
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">A</div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-slate-900">Academy Sub-Plan <span class="text-indigo-600">Strategy</span></h1>
+                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Stakeholder Shared Dashboard</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <button onclick="switchTab('system')" id="nav-system" class="nav-active px-1 pt-1 text-sm font-medium text-gray-900 focus:outline-none">システム・権限連動</button>
+                    <button onclick="switchTab('strategy')" id="nav-strategy" class="px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 focus:outline-none">戦略・中の人施策</button>
+                    <button onclick="switchTab('profit')" id="nav-profit" class="px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900 focus:outline-none">収益・損益シミュ</button>
+                </nav>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200 uppercase">
+                        Strategic Target: 2026.04.01
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- TAB 1: SYSTEM & PERMISSION FLOW (Highest Priority) -->
+        <div id="tab-system" class="space-y-8 animate-fade-in">
+            
+            <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl">
+                <div class="flex">
+                    <div class="flex-shrink-0 text-red-500"><i class="fas fa-exclamation-triangle text-xl"></i></div>
+                    <div class="ml-4">
+                        <h3 class="text-sm font-bold text-red-800 uppercase">最重要論点：決済と権限の自動化</h3>
+                        <p class="mt-1 text-sm text-red-700 leading-relaxed">
+                            決済状態と視聴権限が自動連動できない場合、980円モデルは管理コストの増大により破綻します。
+                            手動権限付与を原則禁止し、**「解約＝自動停止」「支払失敗＝猶予期間」**の完全自動フロー構築が最優先課題です。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LMS Comparison -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-microchip mr-2 text-indigo-500"></i>LMS選定・比較検討</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs text-left">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-3 py-2 border-b font-bold text-gray-600">プラットフォーム</th>
+                                    <th class="px-3 py-2 border-b font-bold text-gray-600">サブスク/自動化</th>
+                                    <th class="px-3 py-2 border-b font-bold text-gray-600">費用目安(月)</th>
+                                    <th class="px-3 py-2 border-b font-bold text-gray-600">評価</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="bg-gray-50/50">
+                                    <td class="px-3 py-3 font-bold">Lekcha (現状)</td>
+                                    <td class="px-3 py-3 text-red-500 font-medium">△ 定期課金/停止が限定的</td>
+                                    <td class="px-3 py-3">低コスト</td>
+                                    <td class="px-3 py-3"><span class="status-badge bg-red-100 text-red-700">要検証・不向き</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-3 font-bold">Teachable</td>
+                                    <td class="px-3 py-3 text-green-600 font-medium">◎ 完璧な決済連動</td>
+                                    <td class="px-3 py-3">~$119 (Basic)</td>
+                                    <td class="px-3 py-3"><span class="status-badge bg-green-100 text-green-700">有力候補</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-3 font-bold">Thinkific</td>
+                                    <td class="px-3 py-3 text-green-600 font-medium">◎ サブスク対応</td>
+                                    <td class="px-3 py-3">~$149</td>
+                                    <td class="px-3 py-3"><span class="status-badge bg-green-100 text-green-700">安定</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-3 font-bold">WP + MemberPress</td>
+                                    <td class="px-3 py-3 text-blue-600 font-medium">○ 自由度高いが保守要</td>
+                                    <td class="px-3 py-3">年額制 + 管理費</td>
+                                    <td class="px-3 py-3"><span class="status-badge bg-blue-100 text-blue-700">内製派向け</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-4 text-[10px] text-gray-500">※費用はプラン内容や取引手数料により変動します。YouTube埋め込みは全候補で対応可能。</p>
+                </div>
+
+                <!-- Ideal System Flow -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4"><i class="fas fa-project-diagram mr-2 text-indigo-500"></i>理想的な権限連動フロー</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flow-node w-32 text-center text-[10px] font-bold">決済完了<br>(Stripe/LMS)</div>
+                            <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
+                            <div class="flow-node w-32 text-center text-[10px] font-bold border-indigo-200 bg-indigo-50">権限付与<br>(Active)</div>
+                            <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
+                            <div class="flow-node w-32 text-center text-[10px] font-bold">動画・テスト<br>利用可能</div>
+                        </div>
+                        <div class="flex items-center justify-between opacity-80">
+                            <div class="flow-node w-32 text-center text-[10px] font-bold border-red-200 bg-red-50 text-red-600">支払失敗<br>(Payment Failed)</div>
+                            <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
+                            <div class="flow-node w-32 text-center text-[10px] font-bold bg-amber-50">猶予期間<br>(3日間等)</div>
+                            <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
+                            <div class="flow-node w-32 text-center text-[10px] font-bold border-red-500 text-red-700">権限自動停止<br>(Inactive)</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg text-[11px] text-gray-600">
+                            <i class="fas fa-info-circle mr-1 text-indigo-400"></i> 
+                            **会員状態定義**: 「Active(有効)」「Past Due(支払待)」「Canceled(解約)」をシステム的に管理画面で一元把握できることが必須条件。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Items Checklist -->
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 uppercase tracking-tighter">Immediate Actions (今すぐやること)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                        <div class="text-[10px] font-bold text-indigo-400 mb-1">SYSTEM</div>
+                        <p class="text-xs font-bold text-indigo-900">Lekchaの定期課金・API仕様の最終確認</p>
+                    </div>
+                    <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                        <div class="text-[10px] font-bold text-emerald-400 mb-1">STRATEGY</div>
+                        <p class="text-xs font-bold text-emerald-900">返金・無料期間・猶予ルールの策定</p>
+                    </div>
+                    <div class="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                        <div class="text-[10px] font-bold text-amber-400 mb-1">INSIDE TEAMS</div>
+                        <p class="text-xs font-bold text-amber-900">「中の人」施策の担当者と台本テンプレ固定</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] font-bold text-slate-400 mb-1">SUPPORT</div>
+                        <p class="text-xs font-bold text-slate-900">決済・解約・未反映のFAQ下書き作成</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: STRATEGY & INSIDE TEAMS -->
+        <div id="tab-strategy" class="hidden space-y-8 animate-fade-in">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 3-Tier Model -->
+                <div class="lg:col-span-2 space-y-6">
+                    <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-layer-group mr-3 text-indigo-500"></i>提供構造の共通認識
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-5 bg-white rounded-xl border border-gray-100 shadow-sm border-t-4 border-green-400">
+                            <span class="text-[10px] font-bold text-green-500">FREE</span>
+                            <h4 class="font-bold text-gray-900 mt-1">FOUNDATION</h4>
+                            <p class="text-xs text-gray-500 mt-2">入口・母集団形成。基礎リテラシーの足切りライン。</p>
+                        </div>
+                        <div class="p-5 bg-white rounded-xl border border-indigo-500 shadow-md border-t-4 border-indigo-600 scale-105">
+                            <span class="text-[10px] font-bold text-indigo-500">SUBS (980円)</span>
+                            <h4 class="font-bold text-gray-900 mt-1">実務OSトレーニング</h4>
+                            <p class="text-xs text-gray-500 mt-2">11領域見放題。自動バッジ付与。量産体制確立済み。</p>
+                        </div>
+                        <div class="p-5 bg-white rounded-xl border border-gray-100 shadow-sm border-t-4 border-amber-400">
+                            <span class="text-[10px] font-bold text-amber-500">PREMIUM</span>
+                            <h4 class="font-bold text-gray-900 mt-1">添削・OJT型</h4>
+                            <p class="text-xs text-gray-500 mt-2">サブスク外。高単価案件への選抜トレーニング。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inside Teams Initiatives -->
+                <div class="bg-indigo-900 text-white p-6 rounded-xl shadow-xl">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-user-friends mr-2 text-indigo-300"></i>「中の人」施策運用
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-indigo-800/50 p-3 rounded-lg border border-indigo-700">
+                            <h4 class="text-sm font-bold flex items-center">
+                                <i class="fas fa-video mr-2"></i>月1 開発ログ動画
+                            </h4>
+                            <p class="text-[11px] text-indigo-200 mt-1">
+                                制作背景・現場課題・次月予告・Q&A。収録15分、編集最小の「動いてる感」重視。
+                            </p>
+                        </div>
+                        <div class="bg-indigo-800/50 p-3 rounded-lg border border-indigo-700">
+                            <h4 class="text-sm font-bold flex items-center">
+                                <i class="fas fa-edit mr-2"></i>月1 note記事
+                            </h4>
+                            <p class="text-[11px] text-indigo-200 mt-1">
+                                動画内容の要約 ＋ 実務トレンド裏話。動画再利用で運用工数を削減。
+                            </p>
+                        </div>
+                        <div class="pt-2">
+                            <h5 class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Success Metric</h5>
+                            <p class="text-xs mt-1 italic">「動画見放題」を「生きた現場知恵の購読」へ昇華し、継続率を担保する。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Existing Operation Reference -->
+            <div class="bg-white p-6 rounded-xl border border-gray-200">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 uppercase">既存運用（継承）</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="flex gap-4">
+                        <div class="text-2xl text-slate-300 font-bold">01</div>
+                        <div>
+                            <h4 class="text-sm font-bold">テスト・バッジ</h4>
+                            <p class="text-xs text-gray-500">Googleフォーム満点回答 → 自社システム自動バッジ付与 → マイページ表示。現行フローを完全踏襲。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="text-2xl text-slate-300 font-bold">02</div>
+                        <div>
+                            <h4 class="text-sm font-bold">講座量産仕様</h4>
+                            <p class="text-xs text-gray-500">5-10分動画、編集最小、台本テンプレ活用。WS/DX領域で既に体制確立済み。新規設計不要。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: PROFIT & SIMULATION -->
+        <div id="tab-profit" class="hidden space-y-8 animate-fade-in">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- P&L Chart -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6 uppercase tracking-widest">Monthly P&L Simulation</h3>
+                    <div class="chart-container">
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                    <div class="mt-6 p-4 bg-slate-50 rounded-lg">
+                        <h4 class="text-xs font-bold text-gray-600 mb-2 underline">収益の勘所</h4>
+                        <ul class="text-[11px] text-gray-500 space-y-1">
+                            <li>・会員数 <strong>150名</strong> 付近が損益分岐点の目安（システム・管理費込）</li>
+                            <li>・980円モデルは「薄利多売」のため、システム自動化が生命線</li>
+                            <li>・300名を超えると月次利益が安定し、新規講座への再投資が可能</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Detailed Costs -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">初期導入・月次コスト概算</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-xs font-bold text-indigo-600 uppercase border-b border-indigo-100 pb-1 mb-2">Initial Cost (初期)</h4>
+                            <div class="flex justify-between text-sm py-1">
+                                <span class="text-gray-600">LMS初期設定・環境構築費</span>
+                                <span class="font-bold">¥50,000 ~ ¥150,000</span>
+                            </div>
+                            <div class="flex justify-between text-sm py-1">
+                                <span class="text-gray-600">決済連携・疎通テスト工数</span>
+                                <span class="font-bold">内部工数</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-emerald-600 uppercase border-b border-emerald-100 pb-1 mb-2">Monthly Running Cost (月次)</h4>
+                            <div class="flex justify-between text-sm py-1">
+                                <span class="text-gray-600">LMS月額費用 (Teachable等)</span>
+                                <span class="font-bold">¥15,000 ~ ¥25,000</span>
+                            </div>
+                            <div class="flex justify-between text-sm py-1">
+                                <span class="text-gray-600">決済手数料 (約3.6%)</span>
+                                <span class="font-bold text-gray-400">売上比例</span>
+                            </div>
+                            <div class="flex justify-between text-sm py-1">
+                                <span class="text-gray-600">サポート・トラブル対応工数</span>
+                                <span class="font-bold">¥20,000 (引当)</span>
+                            </div>
+                        </div>
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <h4 class="text-xs font-bold text-indigo-900 mb-2">SLA (サポート基準案)</h4>
+                            <ul class="text-[11px] text-indigo-700 space-y-1">
+                                <li>・問い合わせ対応：<strong>24時間以内（営業日）</strong>に初回返信</li>
+                                <li>・視聴不可トラブル：管理画面での状態確認を優先</li>
+                                <li>・解約・返金：規約に基づき3営業日以内に処理完了</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                AnyMaMa Academy Strategic Project - Confidential<br>
+                Empowering "Practical Intelligence" since 2026
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Data & Initialization ---
+
+        function initCharts() {
+            // Profit Simulation Chart
+            const ctxProfit = document.getElementById('profitChart').getContext('2d');
+            new Chart(ctxProfit, {
+                type: 'bar',
+                data: {
+                    labels: ['100名', '200名', '300名', '400名', '500名'],
+                    datasets: [{
+                        label: '月次利益 (予測)',
+                        data: [
+                            (980 * 100 * 0.96) - 50000, 
+                            (980 * 200 * 0.96) - 50000, 
+                            (980 * 300 * 0.96) - 50000, 
+                            (980 * 400 * 0.96) - 50000, 
+                            (980 * 500 * 0.96) - 50000
+                        ],
+                        backgroundColor: '#4f46e5',
+                        borderRadius: 4
+                    }, {
+                        label: '損益分岐ライン',
+                        data: [0, 0, 0, 0, 0],
+                        type: 'line',
+                        borderColor: '#ef4444',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { borderDash: [2, 2] },
+                            ticks: { font: { size: 9 }, callback: (v) => `¥${v.toLocaleString()}` }
+                        },
+                        x: { ticks: { font: { size: 9 } } }
+                    }
+                }
+            });
+        }
+
+        function switchTab(tabId) {
+            ['system', 'strategy', 'profit'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).classList.remove('nav-active', 'text-gray-900');
+                document.getElementById(`nav-${t}`).classList.add('text-gray-500');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabId}`).classList.add('nav-active', 'text-gray-900');
+            document.getElementById(`nav-${tabId}`).classList.remove('text-gray-500');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+        });
+
+    </script>
+</body>
+</html>
