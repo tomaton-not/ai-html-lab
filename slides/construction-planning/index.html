@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>見積書・工程表作成 効率化システム提案</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chosen Palette: Warm Neutrals with Teal & Amber Accents -->
+    <!-- Application Structure Plan: The SPA is structured as an interactive presentation/dashboard of the proposed system design. It starts with the core concept, moves into an interactive system architecture diagram to explain the data flow, then provides deep dives into the two main tools (Estimate & Schedule) using tabs. A step-by-step workflow simulation follows to show user interaction, concluding with expected impacts and support needs. This structure guides the stakeholder logically from "What is it?" to "How does it work?" and finally "What is the value?", making the abstract system design specification concrete and easy to understand. -->
+    <!-- Visualization & Content Choices: 
+         1. System Architecture -> Goal: Organize/Inform -> Method: HTML/CSS Interactive Diagram (CSS Grid/Flexbox) -> Interaction: Hover/Click to reveal layer details -> Justification: Shows data flow clearly without SVG.
+         2. Estimate vs Schedule Deep Dive -> Goal: Compare/Inform -> Method: Tabbed content with a Bar Chart (Chart.js) for time savings and an HTML/CSS mini-Gantt demo -> Interaction: Tab switching, chart hover -> Justification: Allows focused reading on each tool; Chart.js handles metrics perfectly.
+         3. Workflow -> Goal: Process Flow -> Method: HTML/CSS Stepper with dynamic text updates -> Interaction: Clicking steps -> Justification: Simplifies the operational flow.
+         4. Strengths & Impact -> Goal: Inform/Persuade -> Method: Radar Chart (Chart.js) -> Interaction: Tooltips -> Justification: Visually summarizes the multidimensional benefits.
+         - Confirming NO SVG or Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#f5f5f4', // stone-100
+                            DEFAULT: '#2dd4bf', // teal-400
+                            dark: '#0f766e', // teal-700
+                            accent: '#f59e0b', // amber-500
+                            text: '#292524' // stone-800
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #fafaf9; color: #292524; overflow-x: hidden; }
+        
+        /* Strict Chart Container Styling per requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 400px;
+        }
+
+        /* Custom Animations */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .slide-up { animation: slideUp 0.4s ease-out forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom Scrollbar for inner components */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f5f5f4; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 4px; }
+
+        /* Gantt Demo Styles */
+        .gantt-row { display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: center; border-bottom: 1px solid #e7e5e4; padding: 8px 0; }
+        .gantt-grid { display: grid; grid-template-columns: repeat(14, 1fr); gap: 2px; height: 24px; }
+        .gantt-cell { background-color: #f5f5f4; border-radius: 2px; }
+        .gantt-bar { background-color: #2dd4bf; border-radius: 4px; height: 100%; transition: all 0.3s; }
+        .gantt-bar.critical { background-color: #f59e0b; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-brand-dark text-white p-2 rounded-lg">
+                    <i class="fa-solid fa-layer-group text-xl"></i>
+                </div>
+                <h1 class="text-xl md:text-2xl font-bold text-brand-text tracking-tight">AIハイブリッド 見積・工程表システム</h1>
+            </div>
+            <nav class="hidden md:flex gap-6 text-sm font-medium text-stone-600">
+                <a href="#concept" class="hover:text-brand-dark transition-colors">コンセプト</a>
+                <a href="#architecture" class="hover:text-brand-dark transition-colors">システム構造</a>
+                <a href="#tools" class="hover:text-brand-dark transition-colors">ツール詳細</a>
+                <a href="#workflow" class="hover:text-brand-dark transition-colors">運用フロー</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-16">
+
+        <!-- Section 1: Concept -->
+        <section id="concept" class="slide-up text-center py-12">
+            <h2 class="text-3xl md:text-5xl font-bold mb-6">知識と計算の完全なる融合</h2>
+            <p class="text-lg text-stone-600 max-w-3xl mx-auto leading-relaxed">
+                本システムは、過去の膨大な資料から文脈を読み解く<strong>「NotebookLM（ナレッジ層）」</strong>と、正確なロジックに基づく<strong>「スプレッドシート（計算・生成層）」</strong>を連携させたハイブリッド型ツールです。<br>
+                属人化を排除し、圧倒的なスピードで最適な見積書と工程表を自動生成します。
+            </p>
+        </section>
+
+        <!-- Section 2: Architecture -->
+        <section id="architecture" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 md:p-10 slide-up" style="animation-delay: 0.1s;">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold flex items-center gap-2 mb-4 border-l-4 border-brand-accent pl-3">全体構造図（データフロー）</h2>
+                <p class="text-stone-600">
+                    システムは大きく3つの層（ナレッジ層、計算・生成層、出力層）で構成されています。下の各ブロックをクリックまたはタップして、それぞれの役割とデータの流れを確認してください。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                <!-- Data Flow Arrows (Desktop) -->
+                <div class="hidden md:flex absolute top-1/2 left-0 w-full justify-between px-[16%] pointer-events-none text-stone-300 text-3xl transform -translate-y-1/2 z-0">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+
+                <!-- Layer 1 -->
+                <button onclick="updateArchitectureDetail('knowledge')" class="arch-btn group bg-stone-50 hover:bg-brand-light border-2 border-transparent hover:border-brand-dark transition-all rounded-xl p-6 text-left z-10 relative flex flex-col items-center text-center">
+                    <div class="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">1. ナレッジ層</h3>
+                    <p class="text-sm text-stone-500 font-medium bg-white px-3 py-1 rounded-full border border-stone-200">NotebookLM</p>
+                </button>
+
+                <!-- Layer 2 -->
+                <button onclick="updateArchitectureDetail('calc')" class="arch-btn group bg-stone-50 hover:bg-brand-light border-2 border-brand-dark shadow-md transition-all rounded-xl p-6 text-left z-10 relative flex flex-col items-center text-center">
+                    <div class="w-16 h-16 rounded-full bg-brand-light text-brand-dark flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-table-cells"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">2. 計算・生成層</h3>
+                    <p class="text-sm text-stone-500 font-medium bg-white px-3 py-1 rounded-full border border-stone-200">スプレッドシート</p>
+                </button>
+
+                <!-- Layer 3 -->
+                <button onclick="updateArchitectureDetail('output')" class="arch-btn group bg-stone-50 hover:bg-brand-light border-2 border-transparent hover:border-brand-dark transition-all rounded-xl p-6 text-left z-10 relative flex flex-col items-center text-center">
+                    <div class="w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">3. 出力層</h3>
+                    <p class="text-sm text-stone-500 font-medium bg-white px-3 py-1 rounded-full border border-stone-200">成果物</p>
+                </button>
+            </div>
+
+            <!-- Dynamic Detail Panel -->
+            <div id="arch-detail-panel" class="mt-8 bg-stone-800 text-white rounded-xl p-6 min-h-[160px] fade-in">
+                <div class="flex items-start gap-4">
+                    <div class="text-brand text-3xl mt-1"><i class="fa-solid fa-table-cells"></i></div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-2 text-brand">計算・生成層（スプレッドシート）</h4>
+                        <div class="grid md:grid-cols-2 gap-4 text-sm text-stone-300">
+                            <div class="bg-stone-700/50 p-3 rounded border border-stone-600">
+                                <strong class="text-white block mb-1">見積エンジン</strong>
+                                マスターから単価を呼び出し、原価・利益を計算。条件分岐（例：築30年以上ならアスベスト調査費加算）を自動処理。
+                            </div>
+                            <div class="bg-stone-700/50 p-3 rounded border border-stone-600">
+                                <strong class="text-white block mb-1">工程エンジン</strong>
+                                見積項目から「工種別作業日数（数量×歩掛÷人員）」を算出し、カレンダーへ自動マッピング。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Tool Deep Dive (Tabs) -->
+        <section id="tools" class="slide-up" style="animation-delay: 0.2s;">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold flex items-center gap-2 mb-2 border-l-4 border-brand-accent pl-3">各ツールの詳細仕様</h2>
+                <p class="text-stone-600">
+                    見積書と工程表、それぞれのツールがどのように動作し、業務を効率化するかを解説します。タブを切り替えて詳細をご確認ください。
+                </p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex border-b border-stone-300 mb-6">
+                <button onclick="switchTab('estimate')" id="tab-estimate" class="px-6 py-3 font-bold text-brand-dark border-b-2 border-brand-dark transition-colors">
+                    <i class="fa-solid fa-calculator mr-2"></i>見積作成ツール
+                </button>
+                <button onclick="switchTab('schedule')" id="tab-schedule" class="px-6 py-3 font-bold text-stone-500 border-b-2 border-transparent hover:text-stone-800 transition-colors">
+                    <i class="fa-solid fa-calendar-days mr-2"></i>工程表作成ツール
+                </button>
+            </div>
+
+            <!-- Tab Content: Estimate -->
+            <div id="content-estimate" class="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-in">
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <h3 class="text-lg font-bold mb-4 text-brand-dark">知能型計算書の特徴</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-database text-brand mt-1"></i>
+                                <div>
+                                    <strong class="block text-stone-800">マスタ連動</strong>
+                                    <p class="text-sm text-stone-600">「単価表」シートをDB化。プルダウン選択で「材料原価」「工賃」「材工売価」が即座に反映されます。</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-code-branch text-brand mt-1"></i>
+                                <div>
+                                    <strong class="block text-stone-800">フラグによる条件分岐</strong>
+                                    <p class="text-sm text-stone-600">「築年数 > 30年」で養生・調査費追加、「木造アパート」で構造計算費用追加など、見落としをシステムで防止。</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-robot text-brand mt-1"></i>
+                                <div>
+                                    <strong class="block text-stone-800">AIアシスト連携</strong>
+                                    <p class="text-sm text-stone-600">NotebookLMに「過去のアンピール板付南Ⅱ案件と同じ構成で」と指示し、出力リストをシートへ展開。</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col">
+                    <h3 class="text-lg font-bold mb-4 text-center">見積作成時間の大幅削減効果</h3>
+                    <!-- REQUIRED CHART CONTAINER STRUCTURE -->
+                    <div class="chart-container w-full max-w-md mx-auto h-[300px] flex-grow">
+                        <canvas id="timeSavingChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-stone-500 mt-2">過去資料の検索・転記時間がAIによりほぼゼロに短縮されます。</p>
+                </div>
+            </div>
+
+            <!-- Tab Content: Schedule -->
+            <div id="content-schedule" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8 fade-in">
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <h3 class="text-lg font-bold mb-4 text-amber-600">工期自動算出ガントチャートの特徴</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-link text-amber-500 mt-1"></i>
+                                <div>
+                                    <strong class="block text-stone-800">見積との完全同期</strong>
+                                    <p class="text-sm text-stone-600">見積書の「数量」と「人工」をトリガーに動作。工種（例：クロス張り→内装工事）を自動マッピング。</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-calculator text-amber-500 mt-1"></i>
+                                <div>
+                                    <strong class="block text-stone-800">標準工期の自動算出ロジック</strong>
+                                    <p class="text-sm text-stone-600 bg-stone-100 p-2 rounded mt-1 font-mono text-xs">Σ(見積数量 × 標準歩掛) ÷ 投入人員 = 予定工期</p>
+                                    <p class="text-sm text-stone-600 mt-1">例：クロス200㎡ ÷ (標準50㎡/日) = 4日間として自動描画。</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i class="fa-solid fa-calendar-check text-amber-500 mt-1"></i>
+                                <div>
+                                    <strong class="block text-stone-800">スマート・スケジューリング</strong>
+                                    <p class="text-sm text-stone-600">開始日入力で日曜・祝日を自動スキップ。解体→大工→内装のクリティカルパス順に作業ブロックを配置。</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm overflow-hidden flex flex-col">
+                    <h3 class="text-lg font-bold mb-4 text-center">自動描画ガントチャート（イメージ）</h3>
+                    <div class="flex-grow flex flex-col justify-center">
+                        <!-- HTML/CSS Diagram based Gantt Demo (NO SVG) -->
+                        <div class="w-full text-xs text-stone-500 mb-2 grid grid-cols-[100px_1fr] gap-2">
+                            <div>工種名</div>
+                            <div class="flex justify-between px-1"><span>5/10</span><span>5/17</span><span>5/24</span></div>
+                        </div>
+                        <div class="border border-stone-200 rounded p-2 bg-white">
+                            <div class="gantt-row">
+                                <div class="font-bold text-sm text-stone-700">解体工事</div>
+                                <div class="gantt-grid">
+                                    <div class="gantt-cell"><div class="gantt-bar critical w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar critical w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar critical w-full"></div></div>
+                                    <div class="gantt-cell flex items-center justify-center text-[10px] text-stone-400">休</div>
+                                    <div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div>
+                                </div>
+                            </div>
+                            <div class="gantt-row">
+                                <div class="font-bold text-sm text-stone-700">大工工事</div>
+                                <div class="gantt-grid">
+                                    <div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div>
+                                    <div class="gantt-cell flex items-center justify-center text-[10px] text-stone-400">休</div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full" style="opacity: 0.2"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                    <div class="gantt-cell flex items-center justify-center text-[10px] text-stone-400">休</div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                </div>
+                            </div>
+                            <div class="gantt-row border-b-0">
+                                <div class="font-bold text-sm text-stone-700">内装工事</div>
+                                <div class="gantt-grid">
+                                    <div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div><div class="gantt-cell"></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                    <div class="gantt-cell"><div class="gantt-bar w-full"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-center text-stone-500 mt-4">※日数は見積数量から自動計算。日曜・休日は自動スキップされます。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Workflow Simulation -->
+        <section id="workflow" class="slide-up bg-stone-800 text-white p-6 md:p-10 rounded-2xl" style="animation-delay: 0.3s;">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold flex items-center gap-2 mb-2 border-l-4 border-brand pl-3">運用の流れ（インタラクティブ）</h2>
+                <p class="text-stone-300">
+                    実際のシステム操作イメージをステップ順に確認できます。各ステップをクリックしてください。
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-12 gap-8">
+                <!-- Stepper -->
+                <div class="md:col-span-4 space-y-4">
+                    <button onclick="updateWorkflow(1)" id="step-1" class="workflow-btn w-full text-left p-4 rounded-lg border-2 border-brand bg-stone-700 transition-all flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-full bg-brand text-stone-900 flex items-center justify-center font-bold">1</div>
+                        <div>
+                            <div class="font-bold">構成案を作成</div>
+                            <div class="text-xs text-stone-400">NotebookLM</div>
+                        </div>
+                    </button>
+                    <button onclick="updateWorkflow(2)" id="step-2" class="workflow-btn w-full text-left p-4 rounded-lg border-2 border-transparent hover:border-stone-500 bg-stone-800 transition-all flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-full bg-stone-600 text-white flex items-center justify-center font-bold">2</div>
+                        <div>
+                            <div class="font-bold">数量を入力</div>
+                            <div class="text-xs text-stone-400">見積シート</div>
+                        </div>
+                    </button>
+                    <button onclick="updateWorkflow(3)" id="step-3" class="workflow-btn w-full text-left p-4 rounded-lg border-2 border-transparent hover:border-stone-500 bg-stone-800 transition-all flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-full bg-stone-600 text-white flex items-center justify-center font-bold">3</div>
+                        <div>
+                            <div class="font-bold">開始日を確定</div>
+                            <div class="text-xs text-stone-400">工程表シート</div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Step Content Display -->
+                <div class="md:col-span-8 bg-stone-900 rounded-xl p-6 border border-stone-700 flex flex-col justify-center min-h-[250px]" id="workflow-content">
+                    <!-- Default to Step 1 -->
+                    <div class="fade-in">
+                        <h3 class="text-xl font-bold text-brand mb-3"><i class="fa-solid fa-brain mr-2"></i>Step 1: NotebookLMで「構成案」を作成</h3>
+                        <p class="text-stone-300 mb-4 leading-relaxed">
+                            過去の類似案件PDF（アンピール板付南Ⅱなど）をAIが読み込み解析します。
+                        </p>
+                        <div class="bg-stone-800 p-4 rounded border-l-4 border-brand-accent text-sm text-stone-200 font-mono">
+                            > "今回の3LDKリフォームなら、解体・大工・電気・内装でこの50項目が必要です。また、条件的に『こどもエコホーム補助金』が適用可能な可能性があります。"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Strengths & Support -->
+        <section id="impact" class="slide-up py-8" style="animation-delay: 0.4s;">
+            <div class="mb-8 text-center">
+                <h2 class="text-3xl font-bold mb-4">システムの強みと運用要件</h2>
+                <p class="text-stone-600">導入による圧倒的なメリットと、精度を維持するための要件</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Impact Chart -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col justify-center items-center">
+                    <h3 class="font-bold text-lg mb-2">導入インパクト</h3>
+                    <!-- REQUIRED CHART CONTAINER STRUCTURE -->
+                    <div class="chart-container w-full h-[300px]">
+                        <canvas id="impactChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Support Requirements -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col justify-center">
+                    <h3 class="font-bold text-lg mb-6 text-brand-dark border-b pb-2">運用に向けたサポート要件</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="text-amber-500 text-2xl"><i class="fa-solid fa-database"></i></div>
+                            <div>
+                                <h4 class="font-bold text-stone-800">マスタデータの鮮度維持</h4>
+                                <p class="text-sm text-stone-600 mt-1">材料価格の高騰などに合わせ、スプレッドシートの単価表を定期的にアップデートする必要があります。このデータがAIと計算の要となります。</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="text-amber-500 text-2xl"><i class="fa-solid fa-stopwatch"></i></div>
+                            <div>
+                                <h4 class="font-bold text-stone-800">標準歩掛の精度向上</h4>
+                                <p class="text-sm text-stone-600 mt-1">「この作業には実際何日かかるか」という基準値を、現場実績から継続的にフィードバックし、工程自動生成のロジックを調整していく必要があります。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-8 text-center mt-12">
+        <p class="text-sm">株式会社 I.S.M.アーキテクチャ - 見積書・工程表作成 効率化システム詳細設計書 に基づく提案</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State Management ---
+        const archDetails = {
+            knowledge: {
+                icon: '<i class="fa-solid fa-brain"></i>',
+                title: 'ナレッジ層（NotebookLM）',
+                color: 'text-blue-400',
+                boxes: [
+                    { title: 'インプット', desc: '過去見積、単価表、補助金要領、マンション規約PDFなどの非構造化データ。' },
+                    { title: 'アウトプット', desc: '案件に最適な項目リストの提案、適用可能な補助金の洗い出し、特記事項の抽出。' }
+                ]
+            },
+            calc: {
+                icon: '<i class="fa-solid fa-table-cells"></i>',
+                title: '計算・生成層（スプレッドシート）',
+                color: 'text-brand',
+                boxes: [
+                    { title: '見積エンジン', desc: 'マスターから単価を呼び出し、原価・利益を計算。条件分岐（例：築30年以上ならアスベスト調査費加算）を自動処理。' },
+                    { title: '工程エンジン', desc: '見積項目から「工種別作業日数（数量×歩掛÷人員）」を算出し、カレンダーへ自動マッピング。' }
+                ]
+            },
+            output: {
+                icon: '<i class="fa-solid fa-file-invoice"></i>',
+                title: '出力層（成果物）',
+                color: 'text-amber-400',
+                boxes: [
+                    { title: '顧客向け資料', desc: '明瞭な見積書、見やすいお客様向け工程表を自動出力。' },
+                    { title: '社内・業者向け資料', desc: '社内実行予算書、協力業者（職人）向けのセグメント別工程表を出力。' }
+                ]
+            }
+        };
+
+        const workflowData = {
+            1: {
+                icon: 'fa-brain',
+                title: 'Step 1: NotebookLMで「構成案」を作成',
+                desc: '過去の類似案件PDF（アンピール板付南Ⅱなど）をAIが読み込み解析します。',
+                quote: '> "今回の3LDKリフォームなら、解体・大工・電気・内装でこの50項目が必要です。また、条件的に『こどもエコホーム補助金』が適用可能な可能性があります。"'
+            },
+            2: {
+                icon: 'fa-table',
+                title: 'Step 2: 見積シートで「数量」を入力',
+                desc: 'AIが提案した項目をスプレッドシートへ展開。部屋の寸法などを入力します。',
+                quote: 'マスタ単価に基づいて金額が確定。<br>※この時点で、裏側では「解体：3日、大工：12日、内装：5日」というデータが同時に生成されます。'
+            },
+            3: {
+                icon: 'fa-calendar-days',
+                title: 'Step 3: 工程表シートで「開始日」を確定',
+                desc: '工事開始日（例：5月10日）を入力するだけで、スケジュールが完成します。',
+                quote: 'シートが「日曜・祝日」を自動で除外し、各工種の作業バーを自動配置。<br>職人さん（濱田大工、高崎インテリア等）の名前をマスタから選択して完了。'
+            }
+        };
+
+        // --- Core Interactions ---
+        
+        // Architecture Diagram Interaction
+        function updateArchitectureDetail(key) {
+            // Update buttons styling
+            document.querySelectorAll('.arch-btn').forEach(btn => {
+                btn.classList.remove('border-brand-dark', 'shadow-md');
+                btn.classList.add('border-transparent');
+            });
+            event.currentTarget.classList.remove('border-transparent');
+            event.currentTarget.classList.add('border-brand-dark', 'shadow-md');
+
+            // Update content
+            const data = archDetails[key];
+            const panel = document.getElementById('arch-detail-panel');
+            
+            // Trigger animation
+            panel.classList.remove('fade-in');
+            void panel.offsetWidth; // trigger reflow
+            panel.classList.add('fade-in');
+
+            panel.innerHTML = `
+                <div class="flex items-start gap-4">
+                    <div class="${data.color} text-3xl mt-1">${data.icon}</div>
+                    <div class="w-full">
+                        <h4 class="text-xl font-bold mb-3 ${data.color}">${data.title}</h4>
+                        <div class="grid md:grid-cols-2 gap-4 text-sm text-stone-300">
+                            ${data.boxes.map(box => `
+                                <div class="bg-stone-700/50 p-3 rounded border border-stone-600">
+                                    <strong class="text-white block mb-1">${box.title}</strong>
+                                    ${box.desc}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Tabs Interaction
+        function switchTab(tabId) {
+            // Hide all contents
+            document.getElementById('content-estimate').classList.add('hidden');
+            document.getElementById('content-schedule').classList.add('hidden');
+            
+            // Reset tab styles
+            const tEst = document.getElementById('tab-estimate');
+            const tSch = document.getElementById('tab-schedule');
+            
+            tEst.className = "px-6 py-3 font-bold text-stone-500 border-b-2 border-transparent hover:text-stone-800 transition-colors";
+            tSch.className = "px-6 py-3 font-bold text-stone-500 border-b-2 border-transparent hover:text-stone-800 transition-colors";
+            
+            tEst.innerHTML = '<i class="fa-solid fa-calculator mr-2"></i>見積作成ツール';
+            tSch.innerHTML = '<i class="fa-solid fa-calendar-days mr-2"></i>工程表作成ツール';
+
+            // Show selected content & update styling
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if(tabId === 'estimate') {
+                activeTab.className = "px-6 py-3 font-bold text-brand-dark border-b-2 border-brand-dark transition-colors";
+            } else {
+                activeTab.className = "px-6 py-3 font-bold text-amber-600 border-b-2 border-amber-600 transition-colors";
+            }
+        }
+
+        // Workflow Stepper Interaction
+        function updateWorkflow(step) {
+            // Update buttons
+            for(let i=1; i<=3; i++) {
+                const btn = document.getElementById(`step-${i}`);
+                const circle = btn.querySelector('div:first-child');
+                
+                if(i === step) {
+                    btn.classList.replace('border-transparent', 'border-brand');
+                    btn.classList.replace('bg-stone-800', 'bg-stone-700');
+                    circle.classList.replace('bg-stone-600', 'bg-brand');
+                    circle.classList.replace('text-white', 'text-stone-900');
+                } else {
+                    btn.classList.replace('border-brand', 'border-transparent');
+                    btn.classList.replace('bg-stone-700', 'bg-stone-800');
+                    circle.classList.replace('bg-brand', 'bg-stone-600');
+                    circle.classList.replace('text-stone-900', 'text-white');
+                }
+            }
+
+            // Update Content
+            const data = workflowData[step];
+            const contentPanel = document.getElementById('workflow-content');
+            
+            contentPanel.innerHTML = `
+                <div class="fade-in">
+                    <h3 class="text-xl font-bold text-brand mb-3"><i class="fa-solid ${data.icon} mr-2"></i>${data.title}</h3>
+                    <p class="text-stone-300 mb-4 leading-relaxed">${data.desc}</p>
+                    <div class="bg-stone-800 p-4 rounded border-l-4 border-brand-accent text-sm text-stone-200 font-mono">
+                        ${data.quote}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Chart.js Implementations ---
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. Bar Chart: Time Savings
+            const ctxTime = document.getElementById('timeSavingChart').getContext('2d');
+            new Chart(ctxTime, {
+                type: 'bar',
+                data: {
+                    labels: ['従来の手作業', 'AIハイブリッド'],
+                    datasets: [{
+                        label: '作成時間 (分)',
+                        data: [120, 30],
+                        backgroundColor: [
+                            '#d6d3d1', // stone-300
+                            '#2dd4bf'  // brand teal
+                        ],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return context.parsed.y + ' 分'; }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f5f5f4' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 2. Radar Chart: System Impact
+            const ctxImpact = document.getElementById('impactChart').getContext('2d');
+            new Chart(ctxImpact, {
+                type: 'radar',
+                data: {
+                    labels: [
+                        '作成スピード', 
+                        '見積精度 (抜け漏れ防止)', 
+                        '工程表との連動性', 
+                        '属人化の排除', 
+                        '情報検索の容易さ'
+                    ],
+                    datasets: [
+                        {
+                            label: '従来手法',
+                            data: [40, 60, 30, 20, 30],
+                            backgroundColor: 'rgba(214, 211, 209, 0.2)', // stone-300
+                            borderColor: '#a8a29e', // stone-400
+                            pointBackgroundColor: '#a8a29e',
+                        },
+                        {
+                            label: 'ハイブリッドシステム',
+                            data: [95, 90, 100, 85, 95],
+                            backgroundColor: 'rgba(45, 212, 191, 0.2)', // brand teal
+                            borderColor: '#2dd4bf', // brand teal
+                            pointBackgroundColor: '#2dd4bf',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e7e5e4' },
+                            grid: { color: '#e7e5e4' },
+                            pointLabels: {
+                                font: { family: "'Noto Sans JP', sans-serif", size: 11 },
+                                color: '#57534e'
+                            },
+                            ticks: { display: false, min: 0, max: 100 }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
